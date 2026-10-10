@@ -50,8 +50,9 @@ The backend is a lightweight Flask application.
 
 ### 3️⃣ Setup Bruno
 - Download and install [Bruno](https://www.usebruno.com).
-- Create a **New Collection** named `Auntie Som Lab`.
-- Create an **Environment** (e.g., `local`) and set a variable `baseUrl` to `http://localhost:5000`.
+- Open the included `auntie-som-noodle-api-test` collection folder in Bruno.
+- Select the included `local` environment (`baseUrl` is already set to `http://localhost:5000`).
+- Start the API from a **fresh process** before each full collection run. The API stores stock and orders only in memory and has no reset endpoint.
 
 ---
 
@@ -154,3 +155,24 @@ Your task is to create a comprehensive Bruno collection that validates the entir
 
 ---
 *Good luck. Auntie Som is counting on you!* 🍜🔥
+
+---
+
+## ✅ Included Bruno test suite
+
+Run `auntie-som-noodle-api-test` from the first request with the `local` environment selected. It authenticates once, stores the token and created order ID in environment variables, and uses post-response assertions for every check.
+
+Some requests are deliberately expected to fail against the supplied backend: they are regression tests for defects discovered during the audit.
+
+| Defect | Bruno test that detects it |
+| --- | --- |
+| An order total subtracts 5 from the menu price without a business rule allowing a discount. | `03-orders/03-create-order` expects a one-item Tom Yum order to total 50. |
+| Orders above available stock are accepted, causing negative inventory. | `04-boundaries/02-reject-oversell` orders two Fried Rice when only one is in stock and expects 400. |
+| Zero and negative quantities are accepted; a negative quantity can increase inventory. | `04-boundaries/01-reject-zero-quantity` and `04-boundaries/03-reject-negative-quantity` each expect 400. |
+| A missing order is returned as `200 OK` instead of a not-found error. | `05-not-found/get-missing-order` expects 404. |
+
+The boundary requests run last because the defective API mutates stock even for invalid quantities. Restart the server before re-running the full suite.
+
+### Observed Bruno run
+
+Running `bru run --env local` against a fresh API process completed all 11 requests: 5 passed and 6 failed. The failures match the defects above (two total-price assertions, zero/negative/oversell quantity validation, and the missing-order status code), so the collection provides reproducible evidence of the backend issues rather than a test-suite configuration problem.
