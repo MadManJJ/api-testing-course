@@ -1,0 +1,28 @@
+meta {
+  name: Reject zero quantity
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+body:json {
+  {
+    "itemId": 1,
+    "quantity": 0
+  }
+}
+
+script:post-response {
+  test("rejects zero quantity", function () {
+    expect(res.getStatus()).to.equal(400);
+  });
+}

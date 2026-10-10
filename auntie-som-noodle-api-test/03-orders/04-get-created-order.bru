@@ -1,0 +1,22 @@
+meta {
+  name: Get created order
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/orders/{{orderId}}
+  body: none
+  auth: none
+}
+
+script:post-response {
+  const body = res.getBody();
+
+  test("returns the saved order unchanged", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(body.orderId).to.equal(bru.getEnvVar("orderId"));
+    expect(body.status).to.equal("created");
+    expect(body.totalPrice).to.equal(50);
+  });
+}

@@ -1,0 +1,35 @@
+meta {
+  name: Create valid order
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+body:json {
+  {
+    "itemId": 1,
+    "quantity": 1
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+
+  test("creates a one-item Tom Yum order at the menu price", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(body.orderId).to.match(/^ORD-[a-f0-9]{6}$/);
+    expect(body.status).to.equal("created");
+    expect(body.totalPrice).to.equal(50);
+  });
+
+  bru.setEnvVar("orderId", body.orderId);
+}

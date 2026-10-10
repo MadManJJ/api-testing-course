@@ -1,0 +1,25 @@
+meta {
+  name: Reject invalid login
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "student",
+    "password": "wrong-password"
+  }
+}
+
+script:post-response {
+  test("rejects invalid credentials", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getBody().error).to.equal("Invalid login");
+  });
+}

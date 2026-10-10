@@ -1,0 +1,23 @@
+meta {
+  name: Get menu
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/menu
+  body: none
+  auth: none
+}
+
+script:post-response {
+  const body = res.getBody();
+
+  test("returns the documented initial menu", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(body).to.deep.equal([
+      { id: 1, name: "Tom Yum Noodles", price: 50, stock: 2 },
+      { id: 2, name: "Fried Rice", price: 45, stock: 1 }
+    ]);
+  });
+}
